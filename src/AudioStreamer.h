@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "platglue.h"
+#include "../include/platglue.h"
 #include "IAudioSource.h"
 #include <esp_timer.h>
 
@@ -24,7 +24,7 @@ private:
   const int STREAMING_BUFFER_SIZE = 2048;
     unsigned char * RtpBuf;
 
-    IAudioSource * m_audioSource = NULL;
+    IAudioSource * m_audioSource = nullptr;
     int m_samplingRate = 16000;
     int m_sampleSizeBytes = 2;
     int m_fragmentSize;

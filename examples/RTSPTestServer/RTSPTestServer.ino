@@ -24,7 +24,7 @@ void setup() {
     AudioTestSource testSource = AudioTestSource();
 
     AudioStreamer streamer = AudioStreamer(&testSource);
-    rtsp = new RTSPServer(&streamer);
+    rtsp = new RTSPServer(&streamer, 554);
 
     rtsp->runAsync();
     

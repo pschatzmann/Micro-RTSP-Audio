@@ -12,7 +12,7 @@
 #pragma once
 
 #include "AudioStreamer.h"
-#include "platglue.h"
+#include "../include/platglue.h"
 
 /// Supported RTSP command types
 enum RTSP_CMD_TYPES
