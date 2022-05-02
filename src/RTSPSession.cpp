@@ -34,7 +34,8 @@ RtspSession::RtspSession(WiFiClient& aClient, AudioStreamer* aStreamer) :
 
     m_RtpClientPort  = 0;
     m_RtcpClientPort = 0;
-    log_i("RTSP session created");
+    log_i("RTSP session created: rate %d", m_Streamer->getSampleRate());
+    assert(m_Streamer->getSampleRate()!=0);
 };
 
 RtspSession::~RtspSession()
@@ -58,6 +59,7 @@ void RtspSession::Init()
 
 bool RtspSession::ParseRtspRequest(char const * aRequest, unsigned aRequestSize)
 {
+
     unsigned CurRequestSize;
 
     log_v("aRequest: ------------------------\n%s\n-------------------------", aRequest);
@@ -69,7 +71,9 @@ bool RtspSession::ParseRtspRequest(char const * aRequest, unsigned aRequestSize)
     // check whether the request contains information about the RTP/RTCP UDP client ports (SETUP command)
     char * ClientPortPtr;
     char * TmpPtr;
-    static char CP[1024];
+    //static char CP[1024];
+    char *CP = Response;  // reuse unused buffer
+    memset(CP,0,sizeof(Response));
     char * pCP;
 
     ClientPortPtr = strstr(CurRequest,"client_port");
@@ -240,11 +244,13 @@ bool RtspSession::ParseRtspRequest(char const * aRequest, unsigned aRequestSize)
             if (sscanf(&CurRequest[j], "%u", &num) == 1) m_ContentLength = num;
         }
     }
+    
     return true;
 };
 
 RTSP_CMD_TYPES RtspSession::Handle_RtspRequest(char const * aRequest, unsigned aRequestSize)
 {
+
     if (ParseRtspRequest(aRequest,aRequestSize))
     {
         switch (m_RtspCmdType)
@@ -262,7 +268,7 @@ RTSP_CMD_TYPES RtspSession::Handle_RtspRequest(char const * aRequest, unsigned a
 
 void RtspSession::Handle_RtspOPTION()
 {
-    static char Response[1024]; // Note: we assume single threaded, this large buf we keep off of the tiny stack
+//  static char Response[1024]; // Note: we assume single threaded, this large buf we keep off of the tiny stack
 
     snprintf(Response,sizeof(Response),
              "RTSP/1.0 200 OK\r\nCSeq: %s\r\n"
@@ -273,9 +279,11 @@ void RtspSession::Handle_RtspOPTION()
 
 void RtspSession::Handle_RtspDESCRIBE()
 {
-    static char Response[1024]; // Note: we assume single threaded, this large buf we keep off of the tiny stack
-    static char SDPBuf[1024];
-    static char URLBuf[1024];
+    assert(m_Streamer->getSampleRate()!=0);
+
+//    static char Response[1024]; // Note: we assume single threaded, this large buf we keep off of the tiny stack
+//    static char SDPBuf[1024];
+//    static char URLBuf[1024];
 
     // check whether we know a stream with the URL which is requested
     m_StreamID = -1;        // invalid URL
@@ -287,10 +295,10 @@ void RtspSession::Handle_RtspDESCRIBE()
     }
 
     // simulate DESCRIBE server response
-    static char OBuf[256];
+    //static char OBuf[256];
     char * ColonPtr;
-    strcpy(OBuf,m_URLHostPort);
-    ColonPtr = strstr(OBuf,":");
+    strncpy(Buf1,m_URLHostPort,256);
+    ColonPtr = strstr(Buf1,":");
     if (ColonPtr != nullptr) ColonPtr[0] = 0x00;
 
     snprintf(SDPBuf,sizeof(SDPBuf),
@@ -301,21 +309,20 @@ void RtspSession::Handle_RtspDESCRIBE()
              "t=0 0\r\n"                            // start / stop - 0 -> unbounded and permanent session
              "m=audio 0 RTP/AVP 11\r\n"             // currently we just handle UDP sessions
              // Media Attributes
-             "a=rtpmap:11 L16/%i/1\r\n"
+             "a=rtpmap:%s\r\n"
              "a=rate:%i\r\n"
              "a=control:%s=0"
-             //"a=ftmp"
-
              ,
              rand() & 0xFF,
-             OBuf, 
-             m_Streamer->getSampleRate(),
+             Buf1, 
+             m_Streamer->getPayloadFormat(),
              m_Streamer->getSampleRate(),
              STD_URL_PRE_SUFFIX);
 
     snprintf(URLBuf,sizeof(URLBuf),
              "rtsp://%s",
              m_URLHostPort);
+
     snprintf(Response,sizeof(Response),
              "RTSP/1.0 200 OK\r\nCSeq: %s\r\n"
              "%s\r\n"
@@ -329,6 +336,7 @@ void RtspSession::Handle_RtspDESCRIBE()
              (int) strlen(SDPBuf),
              SDPBuf);
 
+    log_i("Handle_RtspDESCRIBE: %s", (const char*)Response);
     socketsend(m_RtspClient,Response,strlen(Response));
 }
 
@@ -346,14 +354,14 @@ void RtspSession::InitTransport(u_short aRtpPort, u_short aRtcpPort)
 
 void RtspSession::Handle_RtspSETUP()
 {
-    static char Response[1024];
-    static char Transport[255];
+ // static char Response[1024];
+ // static char Transport[255];
 
     // init RTSP Session transport type (UDP or TCP) and ports for UDP transport
     InitTransport(m_ClientRTPPort,m_ClientRTCPPort);
 
     // simulate SETUP server response
-    snprintf(Transport,sizeof(Transport),
+    snprintf(Buf1,sizeof(Buf1),
                  "RTP/AVP;unicast;destination=127.0.0.1;source=127.0.0.1;client_port=%i-%i;server_port=%i-%i",
                  //"RTP/AVP;unicast;client_port=%i-%i;server_port=%i-%i",
                  m_ClientRTPPort,
@@ -370,7 +378,7 @@ void RtspSession::Handle_RtspSETUP()
              m_CSeq,
              DateHeader(),
              m_RtspSessionID,
-             Transport
+             Buf1
              
              );
 
@@ -379,7 +387,9 @@ void RtspSession::Handle_RtspSETUP()
 
 void RtspSession::Handle_RtspPLAY()
 {
-    static char Response[1024];
+    assert(m_Streamer->getSampleRate()!=0);
+
+ //   static char Response[1024];
 
     // simulate SETUP server response
     snprintf(Response,sizeof(Response),
@@ -403,7 +413,7 @@ void RtspSession::Handle_RtspPLAY()
 
 void RtspSession::Handle_RtspTEARDOWN()
 {
-    static char Response[1024];
+ //   static char Response[1024];
 
     m_Streamer->Stop();
 
@@ -422,7 +432,7 @@ char const * RtspSession::DateHeader()
 {
     static char buf[200];
     time_t tt = time(NULL);
-    strftime(buf, sizeof buf, "Date: %a, %b %d %Y %H:%M:%S GMT", gmtime(&tt));
+    strftime(buf, sizeof(buf), "Date: %a, %b %d %Y %H:%M:%S GMT", gmtime(&tt));
     return buf;
 }
 
@@ -438,6 +448,7 @@ int RtspSession::GetStreamID()
  */
 bool RtspSession::handleRequests(uint32_t readTimeoutMs)
 {
+
     if(m_stopped)
         return false; // Already closed down
 

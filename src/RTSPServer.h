@@ -29,7 +29,7 @@ class RTSPServer {
     
         int numClients = 0;         // number of connected clients
 
-        AudioStreamer * streamer;   // AudioStreamer object that acts as a source for data streams
+        AudioStreamer * streamer=nullptr;   // AudioStreamer object that acts as a source for data streams
 
     public:
         /**

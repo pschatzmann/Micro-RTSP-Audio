@@ -21,6 +21,6 @@ rtsp.runAsync();
 
 The Audio Source must implement the IAudioInterface, mainly the function `readDataTo()` which provides the audio data to the streamer.
 
-# Audio Format
+# Connecting to Server
 
-Currently the audio format is fixed to L16 (16-bit raw audio) with a fixed sample of 16000.
+Open VLC, ->File -> Open Network and enter rtsp://ip-address

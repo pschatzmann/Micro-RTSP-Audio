@@ -11,6 +11,7 @@
 
 #include "AudioStreamer.h"
 #include <stdio.h>
+#include "esp_panic.h"
 
 
 AudioStreamer::AudioStreamer()
@@ -30,7 +31,7 @@ AudioStreamer::AudioStreamer()
 
     m_udpRefCount = 0;
 
-    RtpBuf = new unsigned char[STREAMING_BUFFER_SIZE];
+    RtpBuf = new uint8_t[STREAMING_BUFFER_SIZE+1];
 
     esp_timer_create_args_t timer_args;
     timer_args.callback = AudioStreamer::doRTPStream;
@@ -41,32 +42,75 @@ AudioStreamer::AudioStreamer()
     esp_timer_init();
     esp_timer_create(&timer_args, &RTP_timer);
     
-    this->m_fragmentSize = m_samplingRate / 50;
-    this->m_fragmentSizeBytes = m_fragmentSize * m_sampleSizeBytes;
-
-    log_i("Audio streamer created. Sampling rate: %i, Fragment size: %i (%i bytes)", m_samplingRate, m_fragmentSize, m_fragmentSizeBytes);
 }
 
 AudioStreamer::AudioStreamer(IAudioSource * source) : AudioStreamer() {
     this->m_audioSource = source;
     this->m_samplingRate = source->getSampleRate();
     this->m_sampleSizeBytes = source->getSampleSizeBytes();
+    this->m_channels = source->getChannels();
+    this->m_fragmentSize = m_samplingRate / 50;
+    this->m_fragmentSizeBytes = m_fragmentSize * m_sampleSizeBytes;
+
+    log_i("Audio streamer created. Sampling rate: %i, Fragment size: %i (%i bytes)", m_samplingRate, m_fragmentSize, m_fragmentSizeBytes);
+
 }
 
 AudioStreamer::~AudioStreamer()
 {
-    delete RtpBuf;
+    delete[] RtpBuf;
+    RtpBuf = nullptr;
 }
 
 int AudioStreamer::getSampleRate() {
     return this->m_samplingRate;
 }
 
+int AudioStreamer::getChannels() {
+    return this->m_channels;
+}
+
+const char* AudioStreamer::getPayloadFormat() {
+    // see https://en.wikipedia.org/wiki/RTP_payload_formats
+    // 11 L16/%i/%i
+    switch(m_channels){
+        case 1:
+            snprintf(payload_fromat,30,"11 L16/%i/%i", m_samplingRate, m_channels );
+            break;
+        case 2:
+            snprintf(payload_fromat,30,"10 L16/%i/%i", m_samplingRate, m_channels );
+            break;
+        default:
+            log_e("unsupported audio type");
+            break;
+    }
+    return payload_fromat;
+}
+
 int AudioStreamer::SendRtpPacketDirect() {
+    // check buffer
+    if (RtpBuf==nullptr){
+        log_e("RtpBuf is nullptr");
+        return -1;        
+    }
+
+    // append data to header
+    if (m_audioSource == nullptr) {
+        log_e("No audio source provided");
+        return -1;
+    }
+
+    //unsigned char * dataBuf = &RtpBuf[m_fragmentSize];
+    if (m_fragmentSizeBytes + HEADER_SIZE >= STREAMING_BUFFER_SIZE){
+        log_e("STREAMIN_BUFFER_SIZE too small for the sampling rate: increase to %d",m_fragmentSize * m_sampleSizeBytes+HEADER_SIZE);
+        return -1;
+    }
+
+    memset(RtpBuf,0, STREAMING_BUFFER_SIZE);
 
     // Prepare the 12 byte RTP header TODO this can be optimized, some is static
     RtpBuf[0]  = 0x80;                               // RTP version
-    RtpBuf[1]  = 0x0b | 0x80;                               // L16 payload (11) and no marker bit
+    RtpBuf[1]  = 0x0b | 0x80;                        // L16 payload (11) and no marker bit
     RtpBuf[3]  = m_SequenceNumber & 0x0FF;           // each packet is counted with a sequence counter
     RtpBuf[2]  = m_SequenceNumber >> 8;
     RtpBuf[4]  = (m_Timestamp & 0xFF000000) >> 24;   // each image gets a timestamp
@@ -78,20 +122,25 @@ int AudioStreamer::SendRtpPacketDirect() {
     RtpBuf[10] = 0x7e;
     RtpBuf[11] = 0x67;
 
-    // append data to header
-    if (m_audioSource == NULL) {
-        log_e("No audio source provided");
-        return -1;
-    }
+
+    // determine start of data in buffer
     //unsigned char * dataBuf = ((unsigned char*)RtpBuf + HEADER_SIZE);
     unsigned char * dataBuf = &RtpBuf[HEADER_SIZE];
-    
-    int samples = m_audioSource->readDataTo((void*)dataBuf, m_fragmentSize);
-    int byteLen = samples * m_audioSource->getSampleSizeBytes();
 
-    m_SequenceNumber++;                              // prepare the packet counter for the next packet
+    int samples = m_audioSource->readDataTo((void*)dataBuf, m_fragmentSize);
+
+    // convert to network format (big endian)
+    int16_t *pt_16 = (int16_t*)dataBuf;
+    for (int j=0;j<samples;j++){
+        pt_16[j] = htons(pt_16[j]);
+    }
+    int byteLen = samples * m_sampleSizeBytes;
+
+    // prepare the packet counter for the next packet
+    m_SequenceNumber++;   
 
     udpsocketsend(m_RtpSocket, RtpBuf, HEADER_SIZE + byteLen, m_ClientIP, m_ClientPort);
+
 
     return samples;
 }
@@ -174,9 +223,24 @@ int AudioStreamer::AddToStream(SAMPLE_TYPE * data, int len) {
 
 void AudioStreamer::Start() {
     log_i("Starting RTP Stream");
-    if (m_audioSource != NULL) {
+
+    if (m_audioSource != nullptr) {
+        m_samplingRate = m_audioSource->getSampleRate();
+        m_sampleSizeBytes = m_audioSource->getSampleSizeBytes();
+        m_channels = m_audioSource->getChannels();
+        m_fragmentSize = m_samplingRate / 50;
+        m_fragmentSizeBytes = m_fragmentSize * m_sampleSizeBytes;
+
+        log_i("m_samplingRate: %d", m_samplingRate);
+        log_i("m_sampleSizeBytes: %d", m_sampleSizeBytes);
+        log_i("m_channels: %d", m_channels);
+        log_i("m_fragmentSize (samples): %d", m_fragmentSize);
+        log_i("m_fragmentSizeBytes: %d ", m_fragmentSizeBytes);
+
         m_audioSource->start();
         esp_timer_start_periodic(RTP_timer, 20000);
+        log_i("Free heap size: %i KB", esp_get_free_heap_size() / 1000);
+
     } else {
         log_e("No streaming source");
     }
@@ -184,7 +248,7 @@ void AudioStreamer::Start() {
 
 void AudioStreamer::Stop() {
     log_i("Stopping RTP Stream");
-    if (m_audioSource != NULL) {
+    if (m_audioSource != nullptr) {
         m_audioSource->stop();
     }
     esp_timer_stop(RTP_timer);

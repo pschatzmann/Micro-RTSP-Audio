@@ -12,7 +12,7 @@
 #pragma once
 
 #include "AudioStreamer.h"
-#include "../include/platglue.h"
+#include "platglue.h"
 
 /// Supported RTSP command types
 enum RTSP_CMD_TYPES
@@ -48,7 +48,7 @@ private:
     int m_StreamID;                                           // number of simulated stream of that session
     IPPORT m_ClientRTPPort;                                  // client port for UDP based RTP transport
     IPPORT m_ClientRTCPPort;                                 // client port for UDP based RTCP transport
-    AudioStreamer * m_Streamer;                                // the UDP streamer of that session
+    AudioStreamer * m_Streamer = nullptr;                                // the UDP streamer of that session
 
     // parameters of the last received RTSP request
     RTSP_CMD_TYPES m_RtspCmdType;                             // command type (if any) of the current request
@@ -57,15 +57,18 @@ private:
     char m_CSeq[RTSP_PARAM_STRING_MAX];                       // RTSP command sequence number
     char m_URLHostPort[MAX_HOSTNAME_LEN];                     // host:port part of the URL
     unsigned m_ContentLength;                                 // SDP string size
-
     uint16_t m_RtpClientPort;      // RTP receiver port on client (in host byte order!)
     uint16_t m_RtcpClientPort;     // RTCP receiver port on client (in host byte order!)
+    char Response[1024]; // Note: we assume single threaded, this large buf we keep off of the tiny stack
+    char SDPBuf[1024];
+    char URLBuf[1024];
+    char Buf1[256];
 public:
     bool m_streaming;
     bool m_stopped;
     bool m_sessionOpen = true;
-    char * RecvBuf;
-    char * CurRequest;
+    char * RecvBuf = nullptr;
+    char * CurRequest = nullptr;
     char CmdName[RTSP_PARAM_STRING_MAX];
 
 public:

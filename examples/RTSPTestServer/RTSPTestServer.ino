@@ -5,6 +5,16 @@
 #include "AudioTestSource.h"
 #include <WiFi.h>
 
+
+const char* ssid = "ssid";
+const char* password = "password";
+
+int port = 554;
+AudioTestSource testSource = AudioTestSource();
+AudioStreamer streamer = AudioStreamer(&testSource);
+RTSPServer rtsp(&streamer, port);
+
+
 bool connectToWiFi(const char* ssid, const char* password) {
   WiFi.begin(ssid, password);
 
@@ -12,34 +22,29 @@ bool connectToWiFi(const char* ssid, const char* password) {
   while (WiFi.status() != WL_CONNECTED) {
       delay(500);
   }
-  log_i("Connected to %s", ssid);
+  Serial.println(WiFi.localIP());
   return true;
 }
 
-RTSPServer * rtsp;
 
 void setup() {
-    connectToWiFi("unknown", "abec4007");
-
-    AudioTestSource testSource = AudioTestSource();
-
-    AudioStreamer streamer = AudioStreamer(&testSource);
-    rtsp = new RTSPServer(&streamer, 554);
-
-    rtsp->runAsync();
+    Serial.begin(114200);
+    
+    connectToWiFi(ssid, password);
+    rtsp.runAsync();
     
     log_i("Set up done");
 }
 
 void loop() {
     vTaskDelay(500 / portTICK_PERIOD_MS);
-    log_i("Free heap size: %i KB", esp_get_free_heap_size() / 1000);
-    log_i("%s: Stack high watermark: %i KB",     
-        pcTaskGetTaskName(NULL),     
-        uxTaskGetStackHighWaterMark(NULL) / 1000     
-    );
-    log_i("%s: Stack high watermark: %i KB",     
-        pcTaskGetTaskName(NULL),     
-        uxTaskGetStackHighWaterMark(NULL) / 1000     
-    );
+    // log_i("Free heap size: %i KB", esp_get_free_heap_size() / 1000);
+    // log_i("%s: Stack high watermark: %i KB",     
+    //     pcTaskGetTaskName(NULL),     
+    //     uxTaskGetStackHighWaterMark(NULL) / 1000     
+    // );
+    // log_i("%s: Stack high watermark: %i KB",     
+    //     pcTaskGetTaskName(NULL),     
+    //     uxTaskGetStackHighWaterMark(NULL) / 1000     
+    // );
 }

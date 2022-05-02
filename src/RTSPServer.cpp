@@ -21,7 +21,7 @@ RTSPServer::RTSPServer(AudioStreamer * streamer, int port, int core) {
 int RTSPServer::runAsync() {
     int error;
 
-    log_v("running RTSP server");
+    log_i("Running RTSP server on port %d",port);
 
     ServerAddr.sin_family      = AF_INET;
     ServerAddr.sin_addr.s_addr = INADDR_ANY;
@@ -121,7 +121,7 @@ void RTSPServer::sessionThread(void * server_obj) {
         {
             uint32_t timeout = 50;
             if(!rtsp->handleRequests(timeout)) {
-                //printf("Request handling returned false\n");
+                //printf("Request handling timed out\n");
             } else {
                 //printf("Request handling successful\n");
             }

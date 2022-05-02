@@ -26,6 +26,14 @@ class IAudioSource {
          * @return sample size in bytes
          */
         virtual int getSampleSizeBytes() = 0;
+
+        /**
+         * @brief Defines the number of channels
+         * 
+         * @return int 
+         */
+        virtual int getChannels() = 0;
+
         /**
          * (Reads and) Copies up to maxSamples samples into the given buffer
          * @param dest Buffer into which the samples are to be copied
