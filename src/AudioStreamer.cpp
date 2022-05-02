@@ -11,7 +11,6 @@
 
 #include "AudioStreamer.h"
 #include <stdio.h>
-#include "esp_panic.h"
 
 
 AudioStreamer::AudioStreamer()
