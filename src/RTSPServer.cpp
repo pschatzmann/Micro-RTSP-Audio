@@ -23,6 +23,9 @@ int RTSPServer::runAsync() {
 
     log_i("Running RTSP server on port %d",port);
 
+    streamer->InitAudioSource();
+    assert(streamer->getSampleRate()!=0);
+
     ServerAddr.sin_family      = AF_INET;
     ServerAddr.sin_addr.s_addr = INADDR_ANY;
     ServerAddr.sin_port        = htons(port);                 // listen on RTSP port 8554 as default

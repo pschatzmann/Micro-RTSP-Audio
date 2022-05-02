@@ -73,6 +73,17 @@ public:
     virtual ~AudioStreamer();
 
     /**
+     * @brief Sets up the information from the AudioSource
+     * 
+     * @return true 
+     * @return false 
+     */
+
+    bool InitAudioSource();
+
+    
+
+    /**
      * Opens sockets for RTP stream
      * @param aClientIP IP address of the RTP client
      * @param aClientPort port of the RTP client

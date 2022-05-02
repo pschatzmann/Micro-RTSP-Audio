@@ -44,15 +44,9 @@ AudioStreamer::AudioStreamer()
 }
 
 AudioStreamer::AudioStreamer(IAudioSource * source) : AudioStreamer() {
-    this->m_audioSource = source;
-    this->m_samplingRate = source->getSampleRate();
-    this->m_sampleSizeBytes = source->getSampleSizeBytes();
-    this->m_channels = source->getChannels();
-    this->m_fragmentSize = m_samplingRate / 50;
-    this->m_fragmentSizeBytes = m_fragmentSize * m_sampleSizeBytes;
-
+    m_audioSource = source;
+    InitAudioSource();
     log_i("Audio streamer created. Sampling rate: %i, Fragment size: %i (%i bytes)", m_samplingRate, m_fragmentSize, m_fragmentSizeBytes);
-
 }
 
 AudioStreamer::~AudioStreamer()
@@ -220,22 +214,26 @@ int AudioStreamer::AddToStream(SAMPLE_TYPE * data, int len) {
 }
 */
 
+bool AudioStreamer::InitAudioSource() {
+    log_i("InitAudioSource");
+    m_samplingRate = m_audioSource->getSampleRate();
+    m_sampleSizeBytes = m_audioSource->getSampleSizeBytes();
+    m_channels = m_audioSource->getChannels();
+    m_fragmentSize = m_samplingRate / 50;
+    m_fragmentSizeBytes = m_fragmentSize * m_sampleSizeBytes;
+
+    log_i("m_samplingRate: %d", m_samplingRate);
+    log_i("m_sampleSizeBytes: %d", m_sampleSizeBytes);
+    log_i("m_channels: %d", m_channels);
+    log_i("m_fragmentSize (samples): %d", m_fragmentSize);
+    log_i("m_fragmentSizeBytes: %d ", m_fragmentSizeBytes);
+}
+
 void AudioStreamer::Start() {
     log_i("Starting RTP Stream");
 
     if (m_audioSource != nullptr) {
-        m_samplingRate = m_audioSource->getSampleRate();
-        m_sampleSizeBytes = m_audioSource->getSampleSizeBytes();
-        m_channels = m_audioSource->getChannels();
-        m_fragmentSize = m_samplingRate / 50;
-        m_fragmentSizeBytes = m_fragmentSize * m_sampleSizeBytes;
-
-        log_i("m_samplingRate: %d", m_samplingRate);
-        log_i("m_sampleSizeBytes: %d", m_sampleSizeBytes);
-        log_i("m_channels: %d", m_channels);
-        log_i("m_fragmentSize (samples): %d", m_fragmentSize);
-        log_i("m_fragmentSizeBytes: %d ", m_fragmentSizeBytes);
-
+        InitAudioSource();
         m_audioSource->start();
         esp_timer_start_periodic(RTP_timer, 20000);
         log_i("Free heap size: %i KB", esp_get_free_heap_size() / 1000);

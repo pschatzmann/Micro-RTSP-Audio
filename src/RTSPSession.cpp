@@ -35,7 +35,6 @@ RtspSession::RtspSession(WiFiClient& aClient, AudioStreamer* aStreamer) :
     m_RtpClientPort  = 0;
     m_RtcpClientPort = 0;
     log_i("RTSP session created: rate %d", m_Streamer->getSampleRate());
-    assert(m_Streamer->getSampleRate()!=0);
 };
 
 RtspSession::~RtspSession()
@@ -336,7 +335,7 @@ void RtspSession::Handle_RtspDESCRIBE()
              (int) strlen(SDPBuf),
              SDPBuf);
 
-    log_i("Handle_RtspDESCRIBE: %s", (const char*)Response);
+    //log_v("Handle_RtspDESCRIBE: %s", (const char*)Response);
     socketsend(m_RtspClient,Response,strlen(Response));
 }
 
