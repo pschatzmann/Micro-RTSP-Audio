@@ -14,6 +14,8 @@
 #include "platglue.h"
 #include "IAudioSource.h"
 #include <esp_timer.h>
+#include <WiFi.h>
+#include <esp_wifi.h>
 
 
 /**

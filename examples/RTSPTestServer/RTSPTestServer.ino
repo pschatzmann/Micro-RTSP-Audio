@@ -3,7 +3,6 @@
 #include "RTSPServer.h"
 #include "AudioStreamer.h"
 #include "AudioTestSource.h"
-#include <WiFi.h>
 
 
 const char* ssid = "ssid";
@@ -31,6 +30,7 @@ void setup() {
     Serial.begin(114200);
     
     connectToWiFi(ssid, password);
+    esp_wifi_set_ps(WIFI_PS_NONE);
     rtsp.runAsync();
     
     log_i("Set up done");
