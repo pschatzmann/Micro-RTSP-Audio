@@ -63,6 +63,7 @@ private:
     char SDPBuf[1024];
     char URLBuf[1024];
     char Buf1[256];
+    char Buf2[256];
 public:
     bool m_streaming;
     bool m_stopped;

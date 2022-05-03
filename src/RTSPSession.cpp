@@ -25,7 +25,6 @@ RtspSession::RtspSession(WiFiClient& aClient, AudioStreamer* aStreamer) :
 
     m_RtspClient = &m_Client;
     m_RtspSessionID  = getRandom();         // create a session ID
-    //m_RtspSessionID |= 0x80000000;
     m_StreamID       = -1;
     m_ClientRTPPort  =  0;
     m_ClientRTCPPort =  0;
@@ -34,7 +33,7 @@ RtspSession::RtspSession(WiFiClient& aClient, AudioStreamer* aStreamer) :
 
     m_RtpClientPort  = 0;
     m_RtcpClientPort = 0;
-    log_i("RTSP session created: rate %d", m_Streamer->getSampleRate());
+    log_i("RTSP session created");
 };
 
 RtspSession::~RtspSession()
@@ -278,7 +277,6 @@ void RtspSession::Handle_RtspOPTION()
 
 void RtspSession::Handle_RtspDESCRIBE()
 {
-    assert(m_Streamer->getSampleRate()!=0);
 
 //    static char Response[1024]; // Note: we assume single threaded, this large buf we keep off of the tiny stack
 //    static char SDPBuf[1024];
@@ -303,19 +301,12 @@ void RtspSession::Handle_RtspDESCRIBE()
     snprintf(SDPBuf,sizeof(SDPBuf),
              "v=0\r\n"                              //SDP Version
              "o=- %d 0 IN IP4 %s\r\n"
-             "s=Microphone\r\n"                     // Stream Name
-             "c=IN IP4 0.0.0.0\r\n"                 // Connection Information
-             "t=0 0\r\n"                            // start / stop - 0 -> unbounded and permanent session
-             "m=audio 0 RTP/AVP 11\r\n"             // currently we just handle UDP sessions
-             // Media Attributes
-             "a=rtpmap:%s\r\n"
-             "a=rate:%i\r\n"
+             "%s"
              "a=control:%s=0"
              ,
              rand() & 0xFF,
              Buf1, 
-             m_Streamer->getPayloadFormat(),
-             m_Streamer->getSampleRate(),
+             m_Streamer->getAudioSource()->getFormat()->format(Buf2, 256),
              STD_URL_PRE_SUFFIX);
 
     snprintf(URLBuf,sizeof(URLBuf),
@@ -335,7 +326,7 @@ void RtspSession::Handle_RtspDESCRIBE()
              (int) strlen(SDPBuf),
              SDPBuf);
 
-    //log_v("Handle_RtspDESCRIBE: %s", (const char*)Response);
+    log_v("Handle_RtspDESCRIBE: %s", (const char*)Response);
     socketsend(m_RtspClient,Response,strlen(Response));
 }
 
@@ -386,8 +377,6 @@ void RtspSession::Handle_RtspSETUP()
 
 void RtspSession::Handle_RtspPLAY()
 {
-    assert(m_Streamer->getSampleRate()!=0);
-
  //   static char Response[1024];
 
     // simulate SETUP server response

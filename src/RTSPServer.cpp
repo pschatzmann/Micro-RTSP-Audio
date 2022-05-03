@@ -18,13 +18,29 @@ RTSPServer::RTSPServer(AudioStreamer * streamer, int port, int core) {
     this->core = core;
 }
 
+int RTSPServer::begin(const char* ssid, const char* password){
+  // Start Wifi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println();
+  Serial.print("connect to rtsp://");
+  Serial.print(WiFi.localIP());
+  Serial.print(":");
+  Serial.println(port);
+  return runAsync();
+}
+
+
 int RTSPServer::runAsync() {
     int error;
 
     log_i("Running RTSP server on port %d",port);
 
     streamer->InitAudioSource();
-    assert(streamer->getSampleRate()!=0);
 
     ServerAddr.sin_family      = AF_INET;
     ServerAddr.sin_addr.s_addr = INADDR_ANY;
@@ -90,8 +106,6 @@ void RTSPServer::serverThread(void* server_obj) {
                 log_d("Created sessionThread");
                 server->numClients++;
             }
-        } else {
-            
         }
 
         vTaskDelayUntil(&prevWakeTime, 200/portTICK_PERIOD_MS);

@@ -46,7 +46,7 @@ AudioStreamer::AudioStreamer()
 AudioStreamer::AudioStreamer(IAudioSource * source) : AudioStreamer() {
     m_audioSource = source;
     InitAudioSource();
-    log_i("Audio streamer created. Sampling rate: %i, Fragment size: %i (%i bytes)", m_samplingRate, m_fragmentSize, m_fragmentSizeBytes);
+    log_i("Audio streamer created.  Fragment size: %i bytes", m_fragmentSize);
 }
 
 AudioStreamer::~AudioStreamer()
@@ -55,30 +55,7 @@ AudioStreamer::~AudioStreamer()
     RtpBuf = nullptr;
 }
 
-int AudioStreamer::getSampleRate() {
-    return this->m_samplingRate;
-}
 
-int AudioStreamer::getChannels() {
-    return this->m_channels;
-}
-
-const char* AudioStreamer::getPayloadFormat() {
-    // see https://en.wikipedia.org/wiki/RTP_payload_formats
-    // 11 L16/%i/%i
-    switch(m_channels){
-        case 1:
-            snprintf(payload_fromat,30,"11 L16/%i/%i", m_samplingRate, m_channels );
-            break;
-        case 2:
-            snprintf(payload_fromat,30,"10 L16/%i/%i", m_samplingRate, m_channels );
-            break;
-        default:
-            log_e("unsupported audio type");
-            break;
-    }
-    return payload_fromat;
-}
 
 int AudioStreamer::SendRtpPacketDirect() {
     // check buffer
@@ -94,8 +71,8 @@ int AudioStreamer::SendRtpPacketDirect() {
     }
 
     //unsigned char * dataBuf = &RtpBuf[m_fragmentSize];
-    if (m_fragmentSizeBytes + HEADER_SIZE >= STREAMING_BUFFER_SIZE){
-        log_e("STREAMIN_BUFFER_SIZE too small for the sampling rate: increase to %d",m_fragmentSize * m_sampleSizeBytes+HEADER_SIZE);
+    if (m_fragmentSize + HEADER_SIZE >= STREAMING_BUFFER_SIZE){
+        log_e("STREAMIN_BUFFER_SIZE too small for the sampling rate: increase to %d",m_fragmentSize+HEADER_SIZE);
         return -1;
     }
 
@@ -120,22 +97,18 @@ int AudioStreamer::SendRtpPacketDirect() {
     //unsigned char * dataBuf = ((unsigned char*)RtpBuf + HEADER_SIZE);
     unsigned char * dataBuf = &RtpBuf[HEADER_SIZE];
 
-    int samples = m_audioSource->readDataTo((void*)dataBuf, m_fragmentSize);
+    int bytesRead = m_audioSource->readBytes((void*)dataBuf, m_fragmentSize);
 
     // convert to network format (big endian)
-    int16_t *pt_16 = (int16_t*)dataBuf;
-    for (int j=0;j<samples;j++){
-        pt_16[j] = htons(pt_16[j]);
-    }
-    int byteLen = samples * m_sampleSizeBytes;
+    m_audioSource->getFormat()->convert(dataBuf, bytesRead);
 
     // prepare the packet counter for the next packet
     m_SequenceNumber++;   
 
-    udpsocketsend(m_RtpSocket, RtpBuf, HEADER_SIZE + byteLen, m_ClientIP, m_ClientPort);
+    udpsocketsend(m_RtpSocket, RtpBuf, HEADER_SIZE + bytesRead, m_ClientIP, m_ClientPort);
 
 
-    return samples;
+    return bytesRead;
 }
 
 u_short AudioStreamer::GetRtpServerPort()
@@ -216,17 +189,8 @@ int AudioStreamer::AddToStream(SAMPLE_TYPE * data, int len) {
 
 bool AudioStreamer::InitAudioSource() {
     log_i("InitAudioSource");
-    m_samplingRate = m_audioSource->getSampleRate();
-    m_sampleSizeBytes = m_audioSource->getSampleSizeBytes();
-    m_channels = m_audioSource->getChannels();
-    m_fragmentSize = m_samplingRate / 50;
-    m_fragmentSizeBytes = m_fragmentSize * m_sampleSizeBytes;
-
-    log_i("m_samplingRate: %d", m_samplingRate);
-    log_i("m_sampleSizeBytes: %d", m_sampleSizeBytes);
-    log_i("m_channels: %d", m_channels);
-    log_i("m_fragmentSize (samples): %d", m_fragmentSize);
-    log_i("m_fragmentSizeBytes: %d ", m_fragmentSizeBytes);
+     m_fragmentSize = getAudioSource()->getFormat()->fragmentSize();
+     log_i("m_fragmentSize (bytes): %d", m_fragmentSize);
 }
 
 void AudioStreamer::Start() {
@@ -253,12 +217,12 @@ void AudioStreamer::Stop() {
 
 void AudioStreamer::doRTPStream(void * audioStreamerObj) {
     AudioStreamer * streamer = (AudioStreamer*)audioStreamerObj;
-    int samples;
     int start, stop;
 
     start = esp_timer_get_time();
 
-    samples = streamer->SendRtpPacketDirect();
+    int bytes = streamer->SendRtpPacketDirect();
+    int samples = bytes/2;
     if (samples < 0) {
         log_w("Direct sending of RTP stream failed");
     } else if (samples > 0) {           // samples have been sent

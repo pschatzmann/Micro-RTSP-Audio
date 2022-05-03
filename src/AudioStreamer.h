@@ -28,13 +28,8 @@ private:
     unsigned char * RtpBuf = nullptr;
 
     IAudioSource * m_audioSource = nullptr;
-    int m_samplingRate = 0;
-    int m_channels = 0;
-    int m_sampleSizeBytes = 0;
-    int m_fragmentSize = 0;
-    int m_fragmentSizeBytes = 0;
-    const int HEADER_SIZE = 12;           // size of the RTP header
-    char payload_fromat[30] = {0};
+    int m_fragmentSize = 0;          // changed from samples to bytes !
+    const int HEADER_SIZE = 12;      // size of the RTP header
 
 
     UDPSOCKET m_RtpSocket;           // RTP socket for streaming RTP packets to client
@@ -114,9 +109,7 @@ public:
 
     u_short GetRtpServerPort();
     u_short GetRtcpServerPort();
-    int getSampleRate();
-    int getChannels();
-    const char* getPayloadFormat();
+    IAudioSource *getAudioSource() {return m_audioSource;}
 
 private:
     /**

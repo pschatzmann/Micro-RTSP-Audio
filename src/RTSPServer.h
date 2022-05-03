@@ -41,6 +41,15 @@ class RTSPServer {
         RTSPServer(AudioStreamer * streamer, int port = 8554, int core = 1);
 
         /**
+         * @brief Start WIFI and runAsync()
+         * 
+         * @param ssid 
+         * @param password 
+         */
+
+        int begin(const char* ssid, const char* password);
+
+        /**
          * Starts running the server in a new asynchronous Task
          * @return 0 on success, or error number
          */

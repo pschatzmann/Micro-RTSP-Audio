@@ -19,7 +19,7 @@ RTSPServer rtsp = RTSPServer(&streamer);
 rtsp.runAsync();
 ```
 
-The Audio Source must implement the IAudioInterface, mainly the function `readDataTo()` which provides the audio data to the streamer.
+The Audio Source must implement the IAudioInterface, mainly the function `readBytes()` which provides the audio data to the streamer.
 
 # Connecting to Server
 

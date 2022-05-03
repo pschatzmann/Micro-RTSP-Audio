@@ -5,30 +5,26 @@
 #include "IAudioSource.h"
 
 class AudioTestSource : public IAudioSource {
- private:
-  int index = 0;
-  static const int testDataSamples = 1024;
 
  public:
-  const int sampleRate = 16000;
+  AudioTestSource(){};
 
- public:
-  AudioTestSource() = auto
-  int getSampleRate() { return sampleRate; }
-  int getSampleSizeBytes() override { return sizeof(int16_t); };
-  int getChannels() { return 1; };
-  int readDataTo(void* dest, int maxSamples) {
+  int readBytes(void* dest, int maxBytes) override {
     int16_t* destSamples = (int16_t*)dest;
-    for (int i = 0; i < maxSamples; i++) {
+    for (int i = 0; i < maxBytes/2; i++) {
       destSamples[i] = testData[index];
       index++;
       if (index >= testDataSamples) index = 0;
     }
-    return maxSamples;
+    return maxBytes;
   }
 
   void start() { log_i("start"); }
   void stop() { log_i("stop"); }
+
+ private:
+  int index = 0;
+  static const int testDataSamples = 1024;
 
   const int16_t testData[testDataSamples] = {
       0,      6398,   12551,  18220,  23188,  27263,  30288,  32146,  32767,

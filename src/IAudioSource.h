@@ -11,28 +11,34 @@
 
 #pragma once
 
+#include "RTSPFormat.h"
+
 /**
  * Interface for an audio source for an RTP stream
  */
 class IAudioSource {
     public:
+        IAudioSource() {}
         /**
-         * Returns sample rate at which data is provided
-         * @return the sample rate
+         * @brief Defines the format of the audio data. If nothing has been defined we 
+         * use 2 byte PCM info with 16000 samples per second on 1 channel
          */
-        virtual int getSampleRate() = 0;
-        /**
-         * Returns size of a single sample in bytes
-         * @return sample size in bytes
-         */
-        virtual int getSampleSizeBytes() = 0;
+        virtual RTSPFormat* getFormat() {
+            if (p_fmt==nullptr){
+                // we assume 2 byte PCM info with 16000 samples per second on 1 channel
+                p_fmt = new RTSPFormatPCM();
+            }
+            return p_fmt;
+        }
 
         /**
-         * @brief Defines the number of channels
+         * @brief Defines the Format 
          * 
-         * @return int 
+         * @param fmt 
          */
-        virtual int getChannels() = 0;
+        void setFormat(RTSPFormat *fmt){
+            p_fmt = fmt;
+        }
 
         /**
          * (Reads and) Copies up to maxSamples samples into the given buffer
@@ -40,13 +46,18 @@ class IAudioSource {
          * @param maxSamples maximum number of samples to be copied
          * @return actual number of samples that were copied
          */
-        virtual int readDataTo(void * dest, int maxSamples) = 0;
+        virtual int readBytes(void * dest, int maxSamples) = 0;
+
         /**
          * Start preparing data in order to provide it for the stream
          */
         virtual void start() {};
+
         /**
          * Stop preparing data as the stream has ended
          */ 
         virtual void stop() {};
+
+    protected:
+        RTSPFormat *p_fmt=nullptr;
 };
