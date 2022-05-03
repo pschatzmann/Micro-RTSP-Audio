@@ -25,6 +25,8 @@ int RTSPServer::begin(const char* ssid, const char* password){
     delay(500);
     Serial.print(".");
   }
+  
+  esp_wifi_set_ps(WIFI_PS_NONE);
 
   Serial.println();
   Serial.print("connect to rtsp://");
