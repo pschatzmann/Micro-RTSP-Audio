@@ -16,12 +16,19 @@ class RTSPFormat {
   // Potential data convertsion e.g. to network format. len is in samples, the
   // result in bytes
   virtual void convert(void* data, int len) {}
-  // Provides the fragment size in bytes
-  virtual int fragmentSize() = 0;
-  virtual int timerPeriod() { return 20000; }
+
+  void setFragmentSize(int fragmentSize) { fragment_size = fragmentSize; }
+  int fragmentSize() { return fragment_size; }
+
+  void setTimerPeriod(int period) { timer_period = period; }
+  int timerPeriod() { return timer_period; }
 
  protected:
   const char* STD_URL_PRE_SUFFIX = "trackID";
+  // for sample rate 16000
+  int fragment_size = 320;
+  int timer_period = 20000;
+
 };
 
 /**
@@ -106,18 +113,10 @@ class RTSPFormatPCM : public RTSPFormat {
   int sampleRate() { return p_info->getSampleRate(); }
   int channels() { return p_info->getChannels(); }
   int bytesPerSample() { return p_info->getSampleSizeBytes(); }
-  // for sample rate 16000
-  int fragmentSize() { return fragment_size; }
-  int timerPeriod() { return timer_period; }
-
-  void setFragmentSize(int fragmentSize) { fragment_size = fragmentSize; }
-  void setTimerPeriod(int period) { timer_period = period; }
 
  protected:
   PCMInfo* p_info = nullptr;
   char payload_fromat[30];
-  int fragment_size = 320;
-  int timer_period = 20000;
 
   const char* payloadFormat(int sampleRate, int channels) {
     // see https://en.wikipedia.org/wiki/RTP_payload_formats
