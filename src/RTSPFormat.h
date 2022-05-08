@@ -107,8 +107,8 @@ class RTSPFormatPCM : public RTSPFormat {
   int channels() { return p_info->getChannels(); }
   int bytesPerSample() { return p_info->getSampleSizeBytes(); }
   // for sample rate 16000
-  int fragmentSize() { return 320; }
-  int timerPeriod() { return 20000; }
+  int fragmentSize() { return fragment_size; }
+  int timerPeriod() { return timer_period; }
 
   void setFragmentSize(int fragmentSize) { fragment_size = fragmentSize; }
   void setTimerPeriod(int period) { timer_period = period; }
