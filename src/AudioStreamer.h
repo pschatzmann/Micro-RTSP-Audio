@@ -29,6 +29,7 @@ private:
 
     IAudioSource * m_audioSource = nullptr;
     int m_fragmentSize = 0;          // changed from samples to bytes !
+    int m_timer_period = 20000;
     const int HEADER_SIZE = 12;      // size of the RTP header
 
 

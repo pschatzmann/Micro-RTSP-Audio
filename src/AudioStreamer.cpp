@@ -175,22 +175,11 @@ void AudioStreamer::ReleaseUdpTransport(void)
     }
 }
 
-/*
-int AudioStreamer::AddToStream(SAMPLE_TYPE * data, int len) {
-    for (int i=0; i < len; i++) {
-        if (xQueueSend(m_streamingData, &data[i], 0) != pdTRUE) {
-            return i;
-        }
-    }
-
-    return 0;
-}
-*/
-
 bool AudioStreamer::InitAudioSource() {
     log_i("InitAudioSource");
-     m_fragmentSize = getAudioSource()->getFormat()->fragmentSize();
-     log_i("m_fragmentSize (bytes): %d", m_fragmentSize);
+    m_fragmentSize = getAudioSource()->getFormat()->fragmentSize();
+    m_timer_period = getAudioSource()->getFormat()->timerPeriod();
+    log_i("m_fragmentSize (bytes): %d", m_fragmentSize);
 }
 
 void AudioStreamer::Start() {
@@ -199,7 +188,7 @@ void AudioStreamer::Start() {
     if (m_audioSource != nullptr) {
         InitAudioSource();
         m_audioSource->start();
-        esp_timer_start_periodic(RTP_timer, 20000);
+        esp_timer_start_periodic(RTP_timer, m_timer_period);
         log_i("Free heap size: %i KB", esp_get_free_heap_size() / 1000);
 
     } else {

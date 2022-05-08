@@ -84,7 +84,6 @@ int RTSPServer::runAsync() {
         return -1;
     } 
 
-
     return 0;
 }
 
@@ -113,7 +112,6 @@ void RTSPServer::serverThread(void* server_obj) {
         vTaskDelayUntil(&prevWakeTime, 200/portTICK_PERIOD_MS);
     }
 
-
     // should never be reached
     closesocket(server->MasterSocket);
 
@@ -127,26 +125,26 @@ void RTSPServer::sessionThread(void * server_obj) {
     SOCKET s = server->ClientSocket;
     TickType_t prevWakeTime = xTaskGetTickCount();
 
-        // stop this task - wait for a client to connect
-        //vTaskSuspend(NULL);
-        // TODO check if everything is ok to go
-        log_v("RTSP Task running");
+    // stop this task - wait for a client to connect
+    //vTaskSuspend(NULL);
+    // TODO check if everything is ok to go
+    log_v("RTSP Task running");
 
-        RtspSession * rtsp = new RtspSession(*s, streamer);     // our threads RTSP session and state
+    RtspSession * rtsp = new RtspSession(*s, streamer);     // our threads RTSP session and state
 
-        log_i("Session ready");
+    log_i("Session ready");
 
-        while (rtsp->m_sessionOpen)
-        {
-            uint32_t timeout = 50;
-            if(!rtsp->handleRequests(timeout)) {
-                //printf("Request handling timed out\n");
-            } else {
-                //printf("Request handling successful\n");
-            }
-
-            vTaskDelayUntil(&prevWakeTime, 50/portTICK_PERIOD_MS);
+    while (rtsp->m_sessionOpen)
+    {
+        uint32_t timeout = 50;
+        if(!rtsp->handleRequests(timeout)) {
+            //printf("Request handling timed out\n");
+        } else {
+            //printf("Request handling successful\n");
         }
+
+        vTaskDelayUntil(&prevWakeTime, 50/portTICK_PERIOD_MS);
+    }
 
     
     // should never be reached

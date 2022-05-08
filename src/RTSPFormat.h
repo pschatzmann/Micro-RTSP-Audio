@@ -16,6 +16,7 @@ class RTSPFormat {
   virtual void convert(void* data, int len) { }
   // Provides the fragment size in bytes
   virtual int fragmentSize() = 0;
+  virtual int timerPeriod() {return 20000;}
 
  protected:
   const char* STD_URL_PRE_SUFFIX = "trackID";
@@ -102,7 +103,9 @@ class RTSPFormatPCM : public RTSPFormat {
   int sampleRate() { return p_info->getSampleRate(); }
   int channels() { return p_info->getChannels(); }
   int bytesPerSample() { return p_info->getSampleSizeBytes(); }
-  int fragmentSize() { return sampleRate() / 50 * bytesPerSample();; }
+  // for sample rate 16000
+  int fragmentSize() { return 320; }
+  int timerPeriod() {return 20000;}
 
   PCMInfo& info() { return *p_info; }
 
