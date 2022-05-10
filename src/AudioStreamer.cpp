@@ -178,11 +178,11 @@ void AudioStreamer::ReleaseUdpTransport(void)
 bool AudioStreamer::InitAudioSource() {
     log_i("InitAudioSource");
     if (getAudioSource()==nullptr){
-        LOGE("audio_source is null");
+        log_e("audio_source is null");
         return false;
     }
     if (getAudioSource()->getFormat()==nullptr){
-        LOGE("fromat is null");
+        log_e("fromat is null");
         return false;
     }
     m_fragmentSize = getAudioSource()->getFormat()->fragmentSize();
