@@ -180,6 +180,7 @@ bool AudioStreamer::InitAudioSource() {
     m_fragmentSize = getAudioSource()->getFormat()->fragmentSize();
     m_timer_period = getAudioSource()->getFormat()->timerPeriod();
     log_i("m_fragmentSize (bytes): %d", m_fragmentSize);
+    return true;
 }
 
 void AudioStreamer::Start() {
