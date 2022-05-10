@@ -29,4 +29,4 @@ Open VLC, ->File -> Open Network and enter rtsp://ip-address
 
 For the time beeing only a sampling rate of 16000 with a mono signal is supported. If you try other settings you will need to adjust the fragment_size and timer_period. But I noticed that the UDP of the ESP32 is just not fast enough to handle more and the only way around this limitation is to use CODECs.
 
-Please note that I have not released this project, so it is purely experimental!
+Please note that I have not released this project yet, so it is purely experimental!
