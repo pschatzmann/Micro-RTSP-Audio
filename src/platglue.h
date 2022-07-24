@@ -1,1 +1,2 @@
-../include/platglue.h
+//../include/platglue.h
+#include "../include/platglue.h"
