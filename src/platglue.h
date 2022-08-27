@@ -1,1 +1,2 @@
-../include/platglue.h
+#pragma once
+#include "../include/platglue.h"
