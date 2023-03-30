@@ -8,8 +8,8 @@ Copyright 2018 S. Kevin Hester-Chow, kevinh@geeksville.com (MIT License)
 # Usage 
 
 ```C++
-// set up an Audio source
-AudioDevice audioSource;
+// set up an Audio source (with your implementation for IAudioSource)
+AudioTestSource audioSource; 
 // create the Audio Streamer using the audio source
 AudioStreamer streamer(&audioSource);    
 // create the RTSPServer using the streamer

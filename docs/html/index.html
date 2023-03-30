@@ -71,10 +71,10 @@ $(function() {
 <h1><a class="anchor" id="autotoc_md1"></a>
 Usage</h1>
 <div class="fragment"><div class="line"> {C++}</div>
-<div class="line">// set up an Audio source</div>
-<div class="line">IAudioSource audioSource = AudioDevice();</div>
+<div class="line">// set up an Audio source (with your implementation for IAudioSource)</div>
+<div class="line">AudioTestSource audioSource; </div>
 <div class="line">// create the Audio Streamer using the audio source</div>
-<div class="line">AudioStreamer streamer = AudioStreamer(&amp;audioSource);    </div>
+<div class="line">AudioStreamer streamer(&amp;audioSource);    </div>
 <div class="line">// create the RTSPServer using the streamer</div>
 <div class="line">RTSPServer rtsp = RTSPServer(&amp;streamer);</div>
 <div class="line">// start the server asynchronously </div>
@@ -88,6 +88,9 @@ Comments</h1>
 <p>For the time beeing only a sampling rate of 16000 with a mono signal is supported. If you try other settings you will need to adjust the fragment_size and timer_period. But I noticed that the UDP of the ESP32 is just not fast enough to handle more and the only way around this limitation is to use CODECs.</p>
 <p>The <a href="https://github.com/pschatzmann/arduino-audio-tools">AudioTools project</a> provides this extended functionality, so I recommend to use this library together with the extended classes, codecs and resample functionality. Examples can be found <a href="https://github.com/pschatzmann/arduino-audio-tools/tree/main/examples/examples-communication/rtsp">in the communications examples folder</a>.</p>
 <h1><a class="anchor" id="autotoc_md4"></a>
+Class Documentation</h1>
+<p>Here is the <a href="https://pschatzmann.github.io/Micro-RTSP-Audio/docs/html/annotated.html">documentation for the classes</a> that are provided by this project.</p>
+<h1><a class="anchor" id="autotoc_md5"></a>
 Installation</h1>
 <p>For Arduino you can download the library as zip and call include Library -&gt; zip library. Or you can git clone this project into the Arduino libraries folder e.g. with</p>
 <div class="fragment"><div class="line">cd  ~/Documents/Arduino/libraries</div>
