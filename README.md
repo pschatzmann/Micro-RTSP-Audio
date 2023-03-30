@@ -30,6 +30,9 @@ For the time beeing only a sampling rate of 16000 with a mono signal is supporte
 
 The [AudioTools project](https://github.com/pschatzmann/arduino-audio-tools) provides this extended functionality, so I recommend to use this library together with the extended classes, codecs and resample functionality. Examples can be found [in the communications examples folder](https://github.com/pschatzmann/arduino-audio-tools/tree/main/examples/examples-communication/rtsp).
 
+# Class Documentation
+
+Here is the [documentation for the classes](https://pschatzmann.github.io/Micro-RTSP-Audio/docs/html/annotated.html) that are provided by this project. 
 
 # Installation
 
