@@ -69,6 +69,11 @@ public:
     virtual ~AudioStreamer();
 
     /**
+     * Defines the AudioSource object (if it was not assigned in the constructor)
+    */
+    virtual void setAudioSource(IAudioSource * source);
+
+    /**
      * @brief Sets up the information from the AudioSource
      * 
      * @return true 

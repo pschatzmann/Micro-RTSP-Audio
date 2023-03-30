@@ -15,7 +15,7 @@ class RTSPFormat {
   virtual const char* format(char* buffer, int len) = 0;
   // Potential data convertsion e.g. to network format. len is in samples, the
   // result in bytes
-  virtual int convert(void* data, int len) {}
+  virtual int convert(void* data, int len) { return len;}
 
   void setFragmentSize(int fragmentSize) { fragment_size = fragmentSize; }
   int fragmentSize() { return fragment_size; }

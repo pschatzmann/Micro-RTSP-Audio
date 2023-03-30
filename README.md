@@ -11,8 +11,7 @@ Copyright 2018 S. Kevin Hester-Chow, kevinh@geeksville.com (MIT License)
 // set up an Audio source
 IAudioSource audioSource = AudioDevice();
 // create the Audio Streamer using the audio source
-AudioStreamer streamer = AudioStreamer(&audioSource);
-    
+AudioStreamer streamer = AudioStreamer(&audioSource);    
 // create the RTSPServer using the streamer
 RTSPServer rtsp = RTSPServer(&streamer);
 // start the server asynchronously 
@@ -25,10 +24,18 @@ The Audio Source must implement the IAudioInterface, mainly the function `readBy
 
 Open VLC, ->File -> Open Network and enter rtsp://ip-address
 
-# Limitations
+# Comments
 
 For the time beeing only a sampling rate of 16000 with a mono signal is supported. If you try other settings you will need to adjust the fragment_size and timer_period. But I noticed that the UDP of the ESP32 is just not fast enough to handle more and the only way around this limitation is to use CODECs.
 
-# Using this Library with the Arduino Audio Tools
+The [AudioTools project](https://github.com/pschatzmann/arduino-audio-tools) provides this extended functionality, so I recommend to use this library together with the extended classes, codecs and resample functionality. Examples can be found [in the communications examples folder](https://github.com/pschatzmann/arduino-audio-tools/tree/main/examples/examples-communication/rtsp).
 
-The AudioTools provide some extended functionality, so I recommend to use this library together with the extended classes.
+
+# Installation
+
+For Arduino you can download the library as zip and call include Library -> zip library. Or you can git clone this project into the Arduino libraries folder e.g. with
+
+```
+cd  ~/Documents/Arduino/libraries
+git clone pschatzmann/MICRO-RTSP-AUDIO.git
+```

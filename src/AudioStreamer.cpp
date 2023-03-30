@@ -42,11 +42,8 @@ AudioStreamer::AudioStreamer()
     esp_timer_create(&timer_args, &RTP_timer);
     
 }
-
 AudioStreamer::AudioStreamer(IAudioSource * source) : AudioStreamer() {
-    m_audioSource = source;
-    InitAudioSource();
-    log_i("Audio streamer created.  Fragment size: %i bytes", m_fragmentSize);
+    setAudioSource(source);
 }
 
 AudioStreamer::~AudioStreamer()
@@ -55,7 +52,11 @@ AudioStreamer::~AudioStreamer()
     RtpBuf = nullptr;
 }
 
-
+void AudioStreamer::setAudioSource(IAudioSource * source) {
+    m_audioSource = source;
+    InitAudioSource();
+    log_i("Audio streamer created.  Fragment size: %i bytes", m_fragmentSize);
+}
 
 int AudioStreamer::SendRtpPacketDirect() {
     // check buffer
