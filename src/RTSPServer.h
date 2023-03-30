@@ -14,7 +14,7 @@
 #include "AudioStreamer.h"
 
 /**
- * Creates an RTSP Server to listen for client connections and start sessions
+ * @brief Creates an RTSP Server to listen for client connections and start sessions
  */
 class RTSPServer {
     private:

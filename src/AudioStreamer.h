@@ -19,7 +19,7 @@
 
 
 /**
- * Class for streaming data from a source into an RTP stream
+ * @brief Class for streaming data from a source into an RTP stream
  */
 class AudioStreamer
 {

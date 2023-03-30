@@ -33,7 +33,7 @@ enum RTSP_CMD_TYPES
 #define MAX_HOSTNAME_LEN       256
 
 /**
- * Class for handling an RTSP session
+ * @brief Class for handling an RTSP session
  * Requires a an AudioStreamer as a source for Streaming
  */
 class RtspSession 

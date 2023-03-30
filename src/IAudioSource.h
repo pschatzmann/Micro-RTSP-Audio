@@ -14,7 +14,7 @@
 #include "RTSPFormat.h"
 
 /**
- * Interface for an audio source for an RTP stream
+ * @brief Interface for an audio source for an RTP stream
  */
 class IAudioSource {
     public:
