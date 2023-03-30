@@ -15,7 +15,7 @@ class RTSPFormat {
   virtual const char* format(char* buffer, int len) = 0;
   // Potential data convertsion e.g. to network format. len is in samples, the
   // result in bytes
-  virtual void convert(void* data, int len) {}
+  virtual int convert(void* data, int len) {}
 
   void setFragmentSize(int fragmentSize) { fragment_size = fragmentSize; }
   int fragmentSize() { return fragment_size; }
@@ -100,12 +100,13 @@ class RTSPFormatPCM : public RTSPFormat {
    * @param data
    * @param byteSize
    */
-  void convert(void* data, int samples) {
+  int convert(void* data, int samples) {
     // convert to network format (big endian)
     int16_t* pt_16 = (int16_t*)data;
     for (int j = 0; j < samples / 2; j++) {
       pt_16[j] = htons(pt_16[j]);
     }
+    return samples;
   }
 
   PCMInfo& info() { return *p_info; }

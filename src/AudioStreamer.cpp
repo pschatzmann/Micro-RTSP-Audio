@@ -100,15 +100,15 @@ int AudioStreamer::SendRtpPacketDirect() {
     int bytesRead = m_audioSource->readBytes((void*)dataBuf, m_fragmentSize);
 
     // convert to network format (big endian)
-    m_audioSource->getFormat()->convert(dataBuf, bytesRead);
+    int bytesRead1 = m_audioSource->getFormat()->convert(dataBuf, bytesRead);
 
     // prepare the packet counter for the next packet
     m_SequenceNumber++;   
 
-    udpsocketsend(m_RtpSocket, RtpBuf, HEADER_SIZE + bytesRead, m_ClientIP, m_ClientPort);
+    udpsocketsend(m_RtpSocket, RtpBuf, HEADER_SIZE + bytesRead1, m_ClientIP, m_ClientPort);
 
 
-    return bytesRead;
+    return bytesRead1;
 }
 
 u_short AudioStreamer::GetRtpServerPort()
