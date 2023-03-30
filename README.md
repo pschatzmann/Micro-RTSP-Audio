@@ -9,9 +9,9 @@ Copyright 2018 S. Kevin Hester-Chow, kevinh@geeksville.com (MIT License)
 
 ```C++
 // set up an Audio source
-IAudioSource audioSource = AudioDevice();
+AudioDevice audioSource;
 // create the Audio Streamer using the audio source
-AudioStreamer streamer = AudioStreamer(&audioSource);    
+AudioStreamer streamer(&audioSource);    
 // create the RTSPServer using the streamer
 RTSPServer rtsp = RTSPServer(&streamer);
 // start the server asynchronously 
