@@ -139,7 +139,7 @@ class RTSPFormatPCM : public RTSPFormat {
     return payload_fromat;
   }
 
-  const int format(int channels) {
+  int format(int channels) {
     int result = 0;
     switch (channels) {
       case 1:
