@@ -26,7 +26,7 @@ Open VLC, ->File -> Open Network and enter rtsp://ip-address
 
 # Comments
 
-For the time beeing only a sampling rate of 16000 with a mono signal is supported. If you try other settings you will need to adjust the fragment_size and timer_period. But I noticed that the UDP of the ESP32 is just not fast enough to handle more and the only way around this limitation is to use CODECs.
+For the time being only a sampling rate of 16000 with a mono signal is supported. If you try other settings you will need to adjust the fragment_size and timer_period. But I noticed that the UDP of the ESP32 is just not fast enough to handle more and the only way around this limitation is to use CODECs.
 
 The [AudioTools project](https://github.com/pschatzmann/arduino-audio-tools) provides this extended functionality, so I recommend to use this library together with the extended classes, codecs and resample functionality. Examples can be found [in the communications examples folder](https://github.com/pschatzmann/arduino-audio-tools/tree/main/examples/examples-communication/rtsp).
 
@@ -40,5 +40,5 @@ For Arduino you can download the library as zip and call include Library -> zip 
 
 ```
 cd  ~/Documents/Arduino/libraries
-git clone pschatzmann/MICRO-RTSP-AUDIO.git
+git clone https://github.com/pschatzmann/Micro-RTSP-Audio.git
 ```
