@@ -11,6 +11,9 @@
 
 #include "RTSPServer.h"
 #include "RTSPSession.h"
+#ifdef ESP32
+#include <esp_wifi.h>
+#endif
 
 RTSPServer::RTSPServer(AudioStreamer * streamer, int port, int core) {
     this->streamer = streamer;
@@ -25,8 +28,10 @@ int RTSPServer::begin(const char* ssid, const char* password){
     delay(500);
     Serial.print(".");
   }
-  
+
+#ifdef ESP32
   esp_wifi_set_ps(WIFI_PS_NONE);
+#endif
 
   Serial.println();
   Serial.print("connect to rtsp://");
@@ -136,14 +141,15 @@ void RTSPServer::sessionThread(void * server_obj) {
 
     while (rtsp->m_sessionOpen)
     {
-        uint32_t timeout = 50;
+        uint32_t timeout = 30;
         if(!rtsp->handleRequests(timeout)) {
-            //printf("Request handling timed out\n");
+            log_v("Request handling timed out");
+
         } else {
-            //printf("Request handling successful\n");
+            log_v("Request handling successful");
         }
 
-        vTaskDelayUntil(&prevWakeTime, 50/portTICK_PERIOD_MS);
+        vTaskDelayUntil(&prevWakeTime, timeout/portTICK_PERIOD_MS);
     }
 
     

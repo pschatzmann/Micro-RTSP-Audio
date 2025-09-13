@@ -437,8 +437,7 @@ int RtspSession::GetStreamID()
 bool RtspSession::handleRequests(uint32_t readTimeoutMs)
 {
 
-    if(m_stopped)
-        return false; // Already closed down
+    if(m_stopped) return false; // Already closed down
 
     memset(RecvBuf,0x00, RTSP_BUFFER_SIZE);
     int res = socketread(m_RtspClient, RecvBuf, RTSP_BUFFER_SIZE, readTimeoutMs);
@@ -456,13 +455,11 @@ bool RtspSession::handleRequests(uint32_t readTimeoutMs)
                 
         }
         return true;
-    }
-    else if(res == 0) {
+    } else if(res == 0) {
         log_w("client closed socket, exiting");
         m_stopped = true;
         return true;
-    }
-    else  {
+    } else  {
         // Timeout on read
         //printf("RTSP read timeout\n");
         return false;

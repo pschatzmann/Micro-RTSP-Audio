@@ -15,7 +15,6 @@
 #include "IAudioSource.h"
 #include <esp_timer.h>
 #include <WiFi.h>
-#include <esp_wifi.h>
 
 
 /**
@@ -49,7 +48,8 @@ private:
 
     int m_udpRefCount;
 
-    esp_timer_handle_t RTP_timer;
+    esp_timer_handle_t RTP_timer = nullptr;
+    esp_timer_create_args_t timer_args;
 
 public:
     /**

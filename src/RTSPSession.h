@@ -59,7 +59,7 @@ private:
     unsigned m_ContentLength;                                 // SDP string size
     uint16_t m_RtpClientPort;      // RTP receiver port on client (in host byte order!)
     uint16_t m_RtcpClientPort;     // RTCP receiver port on client (in host byte order!)
-    char Response[1024]; // Note: we assume single threaded, this large buf we keep off of the tiny stack
+    char Response[2251]; // Note: we assume single threaded, this large buf we keep off of the tiny stack
     char SDPBuf[1024];
     char URLBuf[1024];
     char Buf1[256];
@@ -67,7 +67,7 @@ private:
 public:
     bool m_streaming;
     bool m_stopped;
-    bool m_sessionOpen = true;
+    volatile bool m_sessionOpen = true;
     char * RecvBuf = nullptr;
     char * CurRequest = nullptr;
     char CmdName[RTSP_PARAM_STRING_MAX];

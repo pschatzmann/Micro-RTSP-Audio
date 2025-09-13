@@ -26,8 +26,8 @@ class RTSPFormat {
  protected:
   const char* STD_URL_PRE_SUFFIX = "trackID";
   // for sample rate 16000
-  int fragment_size = 320;
-  int timer_period = 20000;
+  int fragment_size = 640;
+  int timer_period = 10000;
 
 };
 
@@ -91,6 +91,7 @@ class RTSPFormatPCM : public RTSPFormat {
              "a=rate:%i\r\n",  // provide sample rate
              format(channels()), payloadFormat(sampleRate(), channels()),
              sampleRate());
+    log_i("ftsp format: %s", buffer);
     return (const char*)buffer;
   }
 

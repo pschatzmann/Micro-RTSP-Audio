@@ -30,16 +30,12 @@ AudioStreamer::AudioStreamer()
 
     m_udpRefCount = 0;
 
-    RtpBuf = new uint8_t[STREAMING_BUFFER_SIZE+1];
-
-    esp_timer_create_args_t timer_args;
+    // setup timer callback arguemnts
     timer_args.callback = AudioStreamer::doRTPStream;
     timer_args.name = "RTP_timer";
     timer_args.arg = (void*)this;
     timer_args.dispatch_method = ESP_TIMER_TASK;
-
-    esp_timer_init();
-    esp_timer_create(&timer_args, &RTP_timer);
+    timer_args.skip_unhandled_events = false;
     
 }
 AudioStreamer::AudioStreamer(IAudioSource * source) : AudioStreamer() {
@@ -194,11 +190,23 @@ bool AudioStreamer::InitAudioSource() {
 
 void AudioStreamer::Start() {
     log_i("Starting RTP Stream");
+    
+    if (RtpBuf == nullptr){
+        RtpBuf = new uint8_t[STREAMING_BUFFER_SIZE+1];
+    }
+
+    if (RTP_timer == nullptr){
+        //esp_timer_init();
+        esp_timer_create(&timer_args, &RTP_timer);
+    }
 
     if (m_audioSource != nullptr) {
         InitAudioSource();
         m_audioSource->start();
-        esp_timer_start_periodic(RTP_timer, m_timer_period);
+        if (esp_timer_start_periodic(RTP_timer, m_timer_period) != ESP_OK) {
+            log_e("Could not start timer");
+        }
+        log_i("timer: %u ms", (unsigned) m_timer_period / 1000);
         log_i("Free heap size: %i KB", esp_get_free_heap_size() / 1000);
 
     } else {
@@ -209,7 +217,7 @@ void AudioStreamer::Start() {
 void AudioStreamer::Stop() {
     log_i("Stopping RTP Stream");
     if (m_audioSource != nullptr) {
-        m_audioSource->stop();
+        m_audioSource->stop();        
     }
     esp_timer_stop(RTP_timer);
 }
