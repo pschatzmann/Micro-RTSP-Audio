@@ -1,5 +1,11 @@
 # Micro-RTSP-Audio
 
+__Please note that I do not support this library any more!__
+
+__This functionality has been integrated into the [Arduino Audio Tools](https://github.com/pschatzmann/arduino-audio-tools)__
+
+-----------------------------------------------------------
+
 Library to asynchronously run an RTSP-Server on an ESP32, in order to stream raw audio.
 
 I modified the library Micro-RTSP for video streaming by Kevin Hester: https://github.com/geeksville/Micro-RTSP<br>
